@@ -108,7 +108,8 @@ jobs:
               memory_unit="Mi"
             )
           crj.save(block_, overwrite=True)
-          crj.run(command=["prefect", "agent", "start", "-q", "default"])
+          crj.command = ["prefect", "agent", "start", "-q", "default"]
+          crj.run()
           EOF
           python blocks.py
 
