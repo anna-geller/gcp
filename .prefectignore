@@ -154,5 +154,5 @@ setup.py
 task-definition.json
 *.md
 *.txt
-*.yaml
+*-deployment.yaml
 *.bash
