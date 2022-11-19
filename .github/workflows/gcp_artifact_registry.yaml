@@ -13,11 +13,6 @@ on:
         required: true
         default: 512
         type: integer
-#        options: ['512', '1024', '2048', '4096', '5120', '6144', '7168', '8192']
-      gcs_path:
-        description: GCS path in the format bucket/path
-        required: true
-        default: 'prefect-orion/flows'
       block_name:
         description: Name of the GCS and Cloud Run blocks
         required: true
@@ -117,4 +112,4 @@ jobs:
         run: prefect deployment build flows/bs.py:bs -n default -q default -ib cloud-run-job/default
 
       - name: Run deployment
-        run: prefect deployment run smart/dev
+        run: prefect deployment run bs/default
