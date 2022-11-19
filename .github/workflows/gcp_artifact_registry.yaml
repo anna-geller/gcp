@@ -68,7 +68,7 @@ jobs:
         id: build-image
         run: |-
           export IMAGE="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT }}/${{ env.REPO }}/prefect:latest"
-          docker build -t $IMAGE -f .
+          docker build -t $IMAGE .
           docker push $IMAGE
           echo "image=$IMAGE" >> $GITHUB_OUTPUT
       - name: Set up Python 3.10
