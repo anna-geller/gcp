@@ -49,7 +49,7 @@ jobs:
         id: build-image
         run: |-
           export IMAGE="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT }}/${{ env.REPO }}/agent:latest"
-          docker build -t $IMAGE -f Dockerfile.GcpAgent .
+          docker build -t $IMAGE .
           docker push $IMAGE
           echo "image=$IMAGE" >> $GITHUB_OUTPUT
 
