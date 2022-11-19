@@ -1,9 +1,5 @@
-FROM prefecthq/prefect:2-python3.9
-RUN /usr/local/bin/python -m pip install --upgrade pip
-WORKDIR /opt/prefect
-COPY setup.py .
-COPY requirements.txt .
-COPY dataflowops/ /opt/prefect/dataflowops/
+FROM prefecthq/prefect:2-python3.10
+RUN pip install --trusted-host pypi.python.org --no-cache-dir gcsfs prefect-gcp Faker
+EXPOSE 8080
 COPY flows/ /opt/prefect/flows/
-RUN pip install .
-RUN prefect block register -m prefect_aws.ecs
+ENTRYPOINT ["prefect", "agent", "start", "-q", "default"]
