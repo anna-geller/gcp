@@ -1,0 +1,87 @@
+name: Google Cloud Run Prefect Agent
+
+on:
+  workflow_dispatch:
+    inputs:
+      gcp_project_id:
+        description: Name of the GCP project ID
+        required: true
+        default: 'prefect-community'
+      prefect-version:
+        description: Prefect version for flows
+        required: true
+        default: '2.*'
+        type: string
+      region:
+        description: GCP Region
+        required: true
+        default: 'us-east1'
+        type: string
+      ar_repository:
+        description: Artifact Registry Repository
+        required: true
+        default: 'sls' # 'us-east1-docker.pkg.dev/prefect-community/sls/prefect:latest'
+        type: string
+
+
+env:
+  PROJECT: ${{ github.event.inputs.gcp_project_id }}
+  REPO: ${{ github.event.inputs.ar_repository }}
+  REGION: ${{ github.event.inputs.region }}
+
+jobs:
+  agent:
+    runs-on: ubuntu-latest
+    outputs:
+      image: ${{ steps.build-image.outputs.image }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Login to GAR
+        uses: docker/login-action@v2
+        with:
+          registry: '${{ env.REGION }}-docker.pkg.dev'
+          username: _json_key
+          password: ${{ secrets.GCP_CREDENTIALS }}
+
+      - name: Build and Push Docker Image
+        id: build-image
+        run: |-
+          export IMAGE="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT }}/${{ env.REPO }}/agent:latest"
+          docker build -t $IMAGE -f Dockerfile.GcpAgent .
+          docker push $IMAGE
+          echo "image=$IMAGE" >> $GITHUB_OUTPUT
+
+      - name: Google Auth
+        id: auth
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
+
+      - name: Create PREFECT_API_KEY GCP secret key
+        run: gcloud secrets create prefectapikey --replication-policy="automatic" --project prefect-community
+        continue-on-error: true
+
+      - name: Create PREFECT_API_URL GCP secret key
+        run: gcloud secrets create prefectapiurl --replication-policy="automatic" --project prefect-community
+        continue-on-error: true
+
+      - name: Create PREFECT_API_KEY GCP secret value
+        run: echo -n "${{ secrets.PREFECT_API_KEY }}" | gcloud secrets versions add prefectapikey --data-file=- --project prefect-community
+
+      - name: Create PREFECT_API_URL GCP secret value
+        run: echo -n "${{ secrets.PREFECT_API_URL }}" | gcloud secrets versions add prefectapiurl --data-file=- --project prefect-community
+
+      - id: deploy
+        uses: google-github-actions/deploy-cloudrun@v0.10.1
+        with:
+          service: prefect-agent
+          image: ${{ steps.build-image.outputs.image }}
+          timeout: "59m59s"
+          flags: "--no-cpu-throttling --min-instances=1"
+          secrets: |
+            PREFECT_API_KEY=prefectapikey:latest
+            PREFECT_API_URL=prefectapiurl:latest
+      - name: Output URL
+        run: curl "${{ steps.deploy.outputs.url }}"
