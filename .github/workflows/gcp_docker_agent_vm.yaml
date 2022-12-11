@@ -1,4 +1,4 @@
-name: GCP Artifact Registry image build
+name: Prefect Agent on GCE
 
 on:
   workflow_dispatch:
@@ -65,6 +65,14 @@ jobs:
           docker push $FLOWS_IMG
           echo "IMAGE_URI=${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT }}/${{ env.GCP_AR_REPO }}/agent:latest" >> $GITHUB_ENV
 
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: "${{ secrets.GCP_CREDENTIALS }}"
+
+      # Setup gcloud CLI
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
 
       - name: Delete VM if exists
         continue-on-error: true
