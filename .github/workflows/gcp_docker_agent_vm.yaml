@@ -57,10 +57,10 @@ jobs:
 
       - name: Set docker image URI
         run: echo "IMAGE_URI=${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT }}/${{ env.GCP_AR_REPO }}/agent:latest" >> $GITHUB_ENV
-      
+
       - name: Build and Push Docker Image
         id: build-image
-        run: |-
+        run: |
           export FLOWS_IMG="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT }}/${{ env.GCP_AR_REPO }}/flows:latest"
           docker build --build-arg PREFECT_API_KEY=${{ secrets.PREFECT_API_KEY }} --build-arg PREFECT_API_URL=${{ secrets.PREFECT_API_URL }} -t "${{ env.IMAGE_URI }}" -f Dockerfile.agent .
           docker build -t $FLOWS_IMG .
@@ -81,10 +81,10 @@ jobs:
         run: gcloud compute instances delete "$GCE_INSTANCE" --zone "$GCE_INSTANCE_ZONE" --quiet
       # Scopes defines which services VM needs, SA sets permissions for those
       - name: Deploy
-        run: |-
+        run: |
           gcloud compute instances create-with-container "$GCE_INSTANCE" \
             --zone "$GCE_INSTANCE_ZONE" \
             --machine-type "$GCE_INSTANCE_MACHINE_TYPE" \
             --service-account "${{ secrets.GCE_SERVICE_ACCOUNT_EMAIL }}" \
-            --scopes "https://www.googleapis.com/auth/cloud-platform" \
+            --scopes "cloud-platform" \
             --container-image "${{ env.IMAGE_URI }}"

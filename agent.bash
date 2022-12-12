@@ -20,13 +20,15 @@ gcloud services enable artifactregistry.googleapis.com
 gcloud services enable secretmanager.googleapis.com
 gcloud services enable run.googleapis.com
 gcloud services enable cloudscheduler.googleapis.com
+#gcloud services enable compute.googleapis.com
+#gcloud services enable logging.googleapis.com
 
 # create service account named e.g. prefect:
 gcloud iam service-accounts create prefect
 export MEMBER="serviceAccount:prefect@prefect-community.iam.gserviceaccount.com"
 gcloud projects add-iam-policy-binding prefect-community --member=$MEMBER --role="roles/run.admin"
-gcloud projects add-iam-policy-binding prefect-community --member=$MEMBER --role="roles/artifactregistry.admin"
-gcloud projects add-iam-policy-binding prefect-community --member=$MEMBER --role="roles/secretmanager.admin"
+gcloud projects add-iam-policy-binding prefect-community --member=$MEMBER --role="roles/artifactregistry.writer"
+gcloud projects add-iam-policy-binding prefect-community --member=$MEMBER --role="roles/compute.admin"
 gcloud projects add-iam-policy-binding prefect-community --member=$MEMBER --role="roles/iam.serviceAccountUser"
 
 # create JSON credentials file as follows, then copy-paste its content into your GHA Secret + Prefect GcpCredentials block:
@@ -70,3 +72,7 @@ prefect deployment build -n default -q default -ib cloud-run-job/default -a -t g
 # query for the Log Explorer:
 # resource.type = "cloud_run_job" resource.labels.job_name = "prefect-cloud-agent" resource.labels.location = "us-east1"
 prefect deployment set-schedule bs/default --cron "*/5 * * * *"
+
+prefect deployment build -n gcp -ib cloud-run-job/default -sb github/gcp -a flows/maintenance.py:maintenance --skip-upload
+prefect deployment build -n vm -sb github/gcp -a flows/maintenance.py:maintenance --skip-upload
+prefect deployment build -n vm -sb github/gcp -a flows/bs.py:bs --skip-upload

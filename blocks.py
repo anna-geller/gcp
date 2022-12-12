@@ -13,5 +13,10 @@ block = CloudRunJob(
 block.save("default", overwrite=True)
 
 
+gh = GitHub(
+    repository="https://github.com/anna-geller/prefect-zoomcamp", reference="main"
+)
+gh.save("prefect-zoomcamp", overwrite=True)
+
 gh = GitHub(repository="https://github.com/anna-geller/gcp", reference="main")
-gh.save("default", overwrite=True)
+gh.save("gcp", overwrite=True)
