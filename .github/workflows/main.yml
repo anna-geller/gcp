@@ -1,4 +1,4 @@
-name: Prefect Agent on GCE
+name: GCE Custom Prefect Agent Action
 on:
   workflow_dispatch:
 jobs:
