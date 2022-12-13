@@ -1,17 +1,17 @@
 name: Custom GHA Prefect Agent
-
 on:
   workflow_dispatch:
-
 jobs:
-  hello_world_job:
+  prefect_agent:
     runs-on: ubuntu-latest
-    name: "A job to say hello"
+    name: "GCE agent"
     steps:
       - uses: actions/checkout@v3
       - id: anna
-        uses: anna-geller/prefect-gcp@v0
+        uses: anna-geller/prefect-gcp@v0.1
         with:
-          who-to-greet: 'Anna the Geller'
-      - run: echo random-number ${{ steps.foo.outputs.random-number }}
-        shell: bash
+          prefect_api_key: ${{ secrets.PREFECT_API_KEY }}
+          prefect_api_url: ${{ secrets.PREFECT_API_URL }}
+          gcp_project_id: "prefect-community"
+          gcp_sa_email: ${{ secrets.GCP_SA_EMAIL }}
+          gcp_credentials_json: ${{ secrets.GCP_CREDENTIALS }}
