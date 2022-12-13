@@ -1,0 +1,15 @@
+on:
+  workflow_dispatch:
+
+jobs:
+  hello_world_job:
+    runs-on: ubuntu-latest
+    name: A job to say hello
+    steps:
+      - uses: actions/checkout@v3
+      - id: foo
+        uses: actions/prefect-gcp@v0
+        with:
+          who-to-greet: 'Anna the Geller'
+      - run: echo random-number ${{ steps.foo.outputs.random-number }}
+        shell: bash
