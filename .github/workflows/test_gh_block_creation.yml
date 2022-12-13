@@ -1,0 +1,33 @@
+name: Create GH block for this repository
+on:
+  workflow_dispatch:
+
+jobs:
+  gh_block:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
+
+      - name: Python dependencies
+        run: pip install prefect
+      - name: Prefect Cloud login
+        run: |
+          prefect config set PREFECT_API_KEY=${{ secrets.PREFECT_API_KEY }}
+          prefect config set PREFECT_API_URL=${{ secrets.PREFECT_API_URL }}
+      - name: Create Block
+        run: |
+          cat <<EOF > blocks.py
+          from prefect.filesystems import GitHub
+          
+          gh = GitHub(repository="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY", reference="$GITHUB_REF_NAME")
+          gh.save("default", overwrite=True)
+          
+          EOF
+          python blocks.py
+      - name: Blocks creation finished
+        run: echo "Blocks built at $(date +'%Y-%m-%dT%H:%M:%S')" >> $GITHUB_STEP_SUMMARY
