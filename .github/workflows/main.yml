@@ -7,7 +7,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - id: anna
-        uses: anna-geller/prefect-gcp@v0.64
+        uses: anna-geller/prefect-gcp@v0.65
         with:
           prefect_api_key: ${{ secrets.PREFECT_API_KEY }}
           prefect_api_url: ${{ secrets.PREFECT_API_URL }}
