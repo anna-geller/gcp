@@ -4,6 +4,7 @@ google-auth-oauthlib
 google-cloud-bigquery
 google-cloud-bigquery-storage
 google-cloud-storage
+google-cloud-aiplatform
 gcsfs
 pandas
 pandas-gbq

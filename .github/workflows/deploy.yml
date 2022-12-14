@@ -3,15 +3,32 @@ on:
   workflow_dispatch:
 
 jobs:
-  deploy_flows:
+  list-flows:
     runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      - id: set-matrix
+        run: echo "matrix=$(ls flows/*.py | jq -R -s -c 'split("\n")[:-1]')" >> $GITHUB_OUTPUT
 
+  deploy_flows:
+    needs: list-flows
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        flows: ${{ fromJson(needs.list-flows.outputs.matrix) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - id: set-flow-name  # example output: "flows/hello.py:hello"
+        run: |
+          export FLOW_NAME="$(basename ${{ matrix.flows }} .py)"
+          export ENTRYPOINT="${{ matrix.flows }}:$FLOW_NAME"
       - id: deploy
         uses: ./.github/actions/deploy-flows
         with:
           prefect_api_key: ${{ secrets.PREFECT_API_KEY }}
           prefect_api_url: ${{ secrets.PREFECT_API_URL }}
-          flow_entrypoint: "flows/hello.py:hello"
+          flow_entrypoint: ${{ env.ENTRYPOINT }}
