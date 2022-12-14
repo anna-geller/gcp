@@ -24,8 +24,8 @@ jobs:
         uses: actions/checkout@v3
       - id: set-flow-name  # example output: "flows/hello.py:hello"
         run: |
-          export FLOW_NAME="$(basename ${{ matrix.flows }} .py)"
-          export ENTRYPOINT="${{ matrix.flows }}:$FLOW_NAME"
+          export FLOW_NAME=$(basename ${{ matrix.flows }} .py)
+          export ENTRYPOINT=${{ matrix.flows }}:$FLOW_NAME
       - id: deploy
         uses: ./.github/actions/deploy-flows
         with:
