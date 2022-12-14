@@ -5,6 +5,7 @@ from prefect_gcp.credentials import GcpCredentials
 
 block = CloudRunJob(
     image="us-east1-docker.pkg.dev/prefect-community/prefect/flows:latest",
+    # image="us-east1-docker.pkg.dev/prefect-community/prefect/agent@sha256:8bc2bf01f28eff196a57903089a914693fd113ef53d8c3081a063c403c9eed74",
     region="us-east1",
     credentials=GcpCredentials.load("default"),
     cpu=1,
